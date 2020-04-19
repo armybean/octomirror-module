@@ -243,9 +243,9 @@ Module.register("octomirror-module", {
                     temps = data.temps[data.temps.length - 2];
                 }
 
-                $("#opNozzleTemp")[0].innerHTML = (temps.tool0.actual) ? temps.tool0.actual.round10(1) + "&deg;C" : "N/A";
+                $("#opNozzleTemp")[0].innerHTML = (temps.tool0.actual) ? temps.tool0.actual.toFixed(1) + "&deg;C" : "N/A";
                 $("#opNozzleTempTgt")[0].innerHTML = (temps.tool0.target) ? Math.round(temps.tool0.target) + "&deg;C" : "N/A";
-                $("#opBedTemp")[0].innerHTML = (temps.bed.actual) ? temps.bed.actual.round10(1) + "&deg;C" : "N/A";
+                $("#opBedTemp")[0].innerHTML = (temps.bed.actual) ? temps.bed.actual.toFixed(1) + "&deg;C" : "N/A";
                 $("#opBedTempTgt")[0].innerHTML = (temps.bed.target) ? Math.round(temps.bed.target) + "&deg;C" : "N/A";
             }
         }
@@ -281,11 +281,4 @@ Number.prototype.toHHMMSS = function() {
         time += (seconds < 10) ? "0" + seconds : String(seconds);
     }
     return time;
-};
-
-Number.prototype.round10 = function(precision) {
-    var factor = Math.pow(10, precision);
-    var tempNumber = this * factor;
-    var roundedTempNumber = Math.round(tempNumber);
-    return roundedTempNumber / factor;
 };
