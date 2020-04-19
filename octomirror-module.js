@@ -80,11 +80,13 @@ Module.register("octomirror-module", {
 
         if (this.config.showTemps) {
             infoWrapper.innerHTML += `
-                <span>${this.translate("TEMPS")} : ${this.translate("NOZZLE")}: </span><span id="opNozzleTemp" class="title bright">N/A</span>
-                <span> ${this.translate("TARGET")}: (<span id="opNozzleTempTgt">N/A</span><span>) | ${this.translate("BED")}: </span><span id="opBedTemp" class="title bright">N/A</span>
-                <span> ${this.translate("TARGET")}: (<span id="opBedTempTgt">N/A</span><span>)</span>
+                <span>${this.translate("TEMPS")}:</span>
+                <span>${this.translate("NOZZLE")}:</span> <span id="opNozzleTemp" class="title bright">N/A</span> <span class="xsmall">(<span id="opNozzleTempTgt">N/A</span>)</span> | 
+                <span>${this.translate("BED")}:</span> <span id="opBedTemp" class="title bright">N/A</span> <span class="xsmall">(<span id="opBedTempTgt">N/A</span>)</span>
                 </div>
                 `;
+        } else {
+            infoWrapper.innerHTML += '</div>';
         }
 
         wrapper.appendChild(infoWrapper);
