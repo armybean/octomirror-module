@@ -2,7 +2,7 @@
     "TITLE": "OctoPrint",
 
     "STATE": "Druckerstatus",
-    "FILE": "File",
+    "FILE": "Datei",
     "ELAPSED": "Zeit vergangen",
     "REMAINING": "Zeit verbleibend",
     "PERCENT": "Prozent abgeschlossen",
