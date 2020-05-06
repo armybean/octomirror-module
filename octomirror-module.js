@@ -66,17 +66,17 @@ Module.register("octomirror-module", {
         if (this.config.printerName === "") {
             infoWrapper.innerHTML = "";
         } else {
-            infoWrapper.innerHTML = `<span id="opPrinterName" class="title bright">${this.config.printerName}</span><br />`;
+            infoWrapper.innerHTML = `<span id="opPrinterName" class="title bright">${this.config.printerName}</span><br>`;
         }
         infoWrapper.innerHTML += `<span>${this.translate("STATE")}: </span><span id="opStateIcon"></span> <span id="opState" class="title bright"> </span>
-                <br />
+                <br>
                 <div id="opMoreInfo">
                 <span>${this.translate("FILE")}: </span><span id="opFile" class="title bright">N/A</span>
-                <br />
+                <br>
                 <span>${this.translate("ELAPSED")}: </span><span id="opPrintTime" class="title bright">N/A</span>
                 <span> | ${this.translate("REMAINING")}: </span><span id="opPrintTimeRemaining" class="title bright">N/A</span>
                 <span> | ${this.translate("PERCENT")}: </span><span id="opPercent" class="title bright">N/A</span>
-                <br />
+                <br>
                 <span>${this.translate("TEMPS")}:</span>
                 <span>${this.translate("NOZZLE")}:</span> <span id="opNozzleTemp" class="title bright">N/A</span> <span class="xsmall">(<span id="opNozzleTempTgt">N/A</span>)</span> | 
                 <span>${this.translate("BED")}:</span> <span id="opBedTemp" class="title bright">N/A</span> <span class="xsmall">(<span id="opBedTempTgt">N/A</span>)</span>
