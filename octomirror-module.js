@@ -217,7 +217,9 @@ Module.register("octomirror-module", {
     },
 
     updateData: function (data) {
-        console.log("Updating OctoPrint Data");
+        if (this.config.debugMode) {
+            console.log("Updating OctoPrint Data");
+        }
         document.getElementById('opState').textContent = (data.state.text.startsWith("Offline (Error: ")) ? this.translate("OFFLINE") : data.state.text;
         let icon = document.getElementById('opStateIcon');
         if (data.state.flags.printing) {
