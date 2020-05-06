@@ -264,10 +264,10 @@ Module.register("octomirror-module", {
                     temps = data.temps[data.temps.length - 2];
                 }
 
-                document.getElementById('opNozzleTemp').innerHTML = temps.tool0.actual ? temps.tool0.actual.toFixed(1) + "&deg;C" : "N/A";
-                document.getElementById('opNozzleTempTgt').innerHTML = temps.tool0.target ? Math.round(temps.tool0.target) + "&deg;C" : "N/A";
-                document.getElementById('opBedTemp').innerHTML = temps.bed.actual ? temps.bed.actual.toFixed(1) + "&deg;C" : "N/A";
-                document.getElementById('opBedTempTgt').innerHTML = temps.bed.target ? Math.round(temps.bed.target) + "&deg;C" : "N/A";
+                document.getElementById('opNozzleTemp').innerHTML = temps.tool0.actual ? temps.tool0.actual.toFixed(1) + " &deg;C" : "N/A";
+                document.getElementById('opNozzleTempTgt').innerHTML = temps.tool0.target ? Math.round(temps.tool0.target) + " &deg;C" : "N/A";
+                document.getElementById('opBedTemp').innerHTML = temps.bed.actual ? temps.bed.actual.toFixed(1) + " &deg;C" : "N/A";
+                document.getElementById('opBedTempTgt').innerHTML = temps.bed.target ? Math.round(temps.bed.target) + " &deg;C" : "N/A";
             }
         }
     },
