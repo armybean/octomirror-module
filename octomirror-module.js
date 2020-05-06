@@ -22,33 +22,33 @@ Module.register("octomirror-module", {
 
     //Override dom generator.
     getDom: function () {
-        var self = this;
-        var wrapper = document.createElement("div");
+        let self = this;
+        let wrapper = document.createElement("div");
 
         if (this.config.showStream) {
-            var stream = document.createElement("img");
-            stream.src = (this.config.streamUrl) ? this.config.streamUrl : this.config.url + ":8080/?action=stream";
+            let stream = document.createElement("img");
+            stream.src = this.config.streamUrl ? this.config.streamUrl : this.config.url + ":8080/?action=stream";
             wrapper.appendChild(stream);
         }
 
         if (this.config.interactive) {
-            var fileMenu = document.createElement("div");
-            var fileList = document.createElement("select");
-            for (var f in this.files) {
-                var option = document.createElement("option");
+            let fileMenu = document.createElement("div");
+            let fileList = document.createElement("select");
+            for (let f in this.files) {
+                let option = document.createElement("option");
                 option.setAttribute("value", this.files[f]);
                 option.appendChild(document.createTextNode(this.files[f]));
                 fileList.appendChild(option);
             }
-            var printButton = document.createElement("button");
+            let printButton = document.createElement("button");
             printButton.appendChild(document.createTextNode("Send to Printer"));
             printButton.addEventListener("click", function () {
                 self.sendPrint(fileList.value);
             });
-            var fileUpload = document.createElement("div");
-            var uploadFileInput = document.createElement("input");
+            let fileUpload = document.createElement("div");
+            let uploadFileInput = document.createElement("input");
             uploadFileInput.setAttribute("type", "file");
-            var uploadButton = document.createElement("button");
+            let uploadButton = document.createElement("button");
             uploadButton.appendChild(document.createTextNode("Upload Files"));
             uploadButton.addEventListener("click", function () {
                 self.uploadFile(uploadFileInput.value);
@@ -61,7 +61,7 @@ Module.register("octomirror-module", {
             wrapper.appendChild(fileMenu);
         }
 
-        var infoWrapper = document.createElement("div");
+        let infoWrapper = document.createElement("div");
         infoWrapper.className = "small";
         if (this.config.printerName === "") {
             infoWrapper.innerHTML = "";
@@ -102,15 +102,14 @@ Module.register("octomirror-module", {
     },
 
     initializeSocket: function () {
-        var self = this;
-
+        let self = this;
         let user = "_api", session = "";
 
-        fetch(this.config.url + "/api/login", {
+        fetch(self.config.url + "/api/login", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Api-Key': this.config.api_key
+                'X-Api-Key': self.config.api_key
             },
             body: JSON.stringify({passive: true})
         })
@@ -121,31 +120,31 @@ Module.register("octomirror-module", {
                 return response.json();
             })
             .then(data => {
-                if (this.config.debugMode) {
+                if (self.config.debugMode) {
                     console.log("Octoprint login response:", data);
                 }
                 session = data.session;
                 // Subscribe to live push updates from the server
-                this.opClient.socket.connect();
+                self.opClient.socket.connect();
             });
 
-        this.opClient.socket.onMessage("connected", (message) => {
-            this.opClient.socket.socket.send(JSON.stringify({auth: `${user}:${session}`}));
+        self.opClient.socket.onMessage("connected", message => {
+            self.opClient.socket.socket.send(JSON.stringify({auth: `${user}:${session}`}));
         });
 
-        if (this.config.debugMode) {
-            this.opClient.socket.onMessage("*", (message) => {
+        if (self.config.debugMode) {
+            self.opClient.socket.onMessage("*", message => {
                 // Reference: http://docs.octoprint.org/en/master/api/push.html#sec-api-push-datamodel-currentandhistory
                 console.log("Octoprint", message);
             });
         }
 
-        this.opClient.socket.onMessage("history", (message) => {
-            this.updateData(message.data);
+        self.opClient.socket.onMessage("history", message => {
+            self.updateData(message.data);
         });
 
-        this.opClient.socket.onMessage("current", (message) => {
-            this.updateData(message.data);
+        self.opClient.socket.onMessage("current", message => {
+            self.updateData(message.data);
         });
     },
 
@@ -168,7 +167,7 @@ Module.register("octomirror-module", {
 
     processFiles: function (data) {
         this.files = [];
-        for (var x in data.files) {
+        for (let x in data.files) {
             this.files.push(data.files[x].name);
         }
         this.show(this.config.animationSpeed, {lockString: this.identifier});
@@ -177,22 +176,21 @@ Module.register("octomirror-module", {
     },
 
     scheduleUpdate: function (delay) {
-        var nextLoad = this.config.updateInterval;
+        let nextLoad = this.config.updateInterval;
         if (typeof delay !== "undefined" && delay >= 0) {
             nextLoad = delay;
         }
 
-        var self = this;
-        clearTimeout(this.updateTimer);
-        this.updateTimer = setTimeout(function () {
+        let self = this;
+        clearTimeout(self.updateTimer);
+        self.updateTimer = setTimeout(function () {
             self.updateFiles();
         }, nextLoad);
     },
 
     updateFiles: function () {
-        var self = this;
-
-        this.opClient.files.list()
+        let self = this;
+        self.opClient.files.list()
             .done(function (response) {
                 self.processFiles(response);
             });
@@ -203,8 +201,8 @@ Module.register("octomirror-module", {
     },
 
     uploadFile: function (file) {
-        var self = this;
-        this.opClient.files.upload("local", file)
+        let self = this;
+        self.opClient.files.upload("local", file)
             .done(function (response) {
                 self.updateFiles();
             });
@@ -221,7 +219,7 @@ Module.register("octomirror-module", {
     updateData: function (data) {
         console.log("Updating OctoPrint Data");
         document.getElementById('opState').textContent = (data.state.text.startsWith("Offline (Error: ")) ? this.translate("OFFLINE") : data.state.text;
-        var icon = document.getElementById('opStateIcon');
+        let icon = document.getElementById('opStateIcon');
         if (data.state.flags.printing) {
             icon.innerHTML = `<i class="fa fa-print" aria-hidden="true" style="color:green;"></i>`;
             if (!this.config.showDetailsWhenOffline) {
@@ -254,22 +252,22 @@ Module.register("octomirror-module", {
             }
         }
 
-        document.getElementById('opFile').textContent = (data.job.file.name) ? data.job.file.name : "N/A";
-        document.getElementById('opPrintTime').textContent = (data.progress.printTime) ? data.progress.printTime.toHHMMSS() : "N/A";
-        document.getElementById('opPrintTimeRemaining').textContent = (data.progress.printTimeLeft) ? data.progress.printTimeLeft.toHHMMSS() : "N/A";
-        document.getElementById('opPercent').textContent = (data.progress.completion) ? Math.round(data.progress.completion) + "%" : "N/A";
+        document.getElementById('opFile').textContent = data.job.file.name ? data.job.file.name : "N/A";
+        document.getElementById('opPrintTime').textContent = data.progress.printTime ? data.progress.printTime.toHHMMSS() : "N/A";
+        document.getElementById('opPrintTimeRemaining').textContent = data.progress.printTimeLeft ? data.progress.printTimeLeft.toHHMMSS() : "N/A";
+        document.getElementById('opPercent').textContent = data.progress.completion ? Math.round(data.progress.completion) + " %" : "N/A";
 
         if (this.config.showTemps) {
             if (data.temps.length) {
-                var temps = data.temps[data.temps.length - 1];
+                let temps = data.temps[data.temps.length - 1];
                 if (typeof temps.bed === "undefined") { // Sometimes the last data point is time only, so back up 1.
                     temps = data.temps[data.temps.length - 2];
                 }
 
-                document.getElementById('opNozzleTemp').innerHTML = (temps.tool0.actual) ? temps.tool0.actual.toFixed(1) + "&deg;C" : "N/A";
-                document.getElementById('opNozzleTempTgt').innerHTML = (temps.tool0.target) ? Math.round(temps.tool0.target) + "&deg;C" : "N/A";
-                document.getElementById('opBedTemp').innerHTML = (temps.bed.actual) ? temps.bed.actual.toFixed(1) + "&deg;C" : "N/A";
-                document.getElementById('opBedTempTgt').innerHTML = (temps.bed.target) ? Math.round(temps.bed.target) + "&deg;C" : "N/A";
+                document.getElementById('opNozzleTemp').innerHTML = temps.tool0.actual ? temps.tool0.actual.toFixed(1) + "&deg;C" : "N/A";
+                document.getElementById('opNozzleTempTgt').innerHTML = temps.tool0.target ? Math.round(temps.tool0.target) + "&deg;C" : "N/A";
+                document.getElementById('opBedTemp').innerHTML = temps.bed.actual ? temps.bed.actual.toFixed(1) + "&deg;C" : "N/A";
+                document.getElementById('opBedTempTgt').innerHTML = temps.bed.target ? Math.round(temps.bed.target) + "&deg;C" : "N/A";
             }
         }
     },
@@ -283,13 +281,13 @@ Module.register("octomirror-module", {
 });
 
 Number.prototype.toHHMMSS = function () {
-    var seconds = Math.floor(this),
+    let seconds = Math.floor(this),
         hours = Math.floor(seconds / 3600);
     seconds -= hours * 3600;
-    var minutes = Math.floor(seconds / 60);
+    let minutes = Math.floor(seconds / 60);
     seconds -= minutes * 60;
 
-    var time = "";
+    let time = "";
 
     if (hours !== 0) {
         time = hours + ":";
