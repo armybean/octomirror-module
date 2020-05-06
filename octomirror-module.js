@@ -104,20 +104,26 @@ Module.register("octomirror-module", {
 
         let user = "_api", session = "";
 
-        $.ajax({
-            url: this.config.url + "/api/login",
-            type: 'post',
-            data: { passive: true },
+        fetch(this.config.url + "/api/login", {
+            method: 'POST',
             headers: {
-                "X-Api-Key": this.config.api_key
+                'Content-Type': 'application/json',
+                'X-Api-Key': this.config.api_key
             },
-            dataType: 'json',
-        }).done((data)=>{
-            if (this.config.debugMode) { console.log("Octoprint login response:",data); }
-            session = data.session;
-            // Subscribe to live push updates from the server
-            this.opClient.socket.connect();
-        });
+            body: JSON.stringify({ passive: true })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (this.config.debugMode) { console.log("Octoprint login response:", data); }
+                session = data.session;
+                // Subscribe to live push updates from the server
+                this.opClient.socket.connect();
+            });
 
         this.opClient.socket.onMessage("connected", (message) => {
             this.opClient.socket.socket.send(JSON.stringify({ auth: `${user}:${session}`}));
@@ -200,34 +206,42 @@ Module.register("octomirror-module", {
             });
     },
 
+    showElement: function (elem) {
+        elem.style.display = 'block';
+    },
+
+    hideElement: function (elem) {
+        elem.style.display = 'none';
+    },
+
     updateData: function(data) {
         console.log("Updating OctoPrint Data");
-        $("#opState")[0].textContent = (data.state.text.startsWith("Offline (Error: ")) ? this.translate("OFFLINE") : data.state.text;
-        var icon = $("#opStateIcon")[0];
+        document.getElementById('opState').textContent = (data.state.text.startsWith("Offline (Error: ")) ? this.translate("OFFLINE") : data.state.text;
+        var icon = document.getElementById('opStateIcon');
         if (data.state.flags.printing) {
             icon.innerHTML = `<i class="fa fa-print" aria-hidden="true" style="color:green;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { $("#opMoreInfo").show(); }
+            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
         } else if (data.state.flags.closedOrError) {
             icon.innerHTML = `<i class="fa fa-exclamation-triangle" aria-hidden="true" style="color:red;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { $("#opMoreInfo").hide(); }
+            if (!this.config.showDetailsWhenOffline) { this.hideElement(document.getElementById('opMoreInfo')); }
         } else if (data.state.flags.paused) {
             icon.innerHTML = `<i class="fa fa-pause" aria-hidden="true" style="color:yellow;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { $("#opMoreInfo").show(); }
+            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
         } else if (data.state.flags.error) {
             icon.innerHTML = `<i class="fa fa-exclamation-triangle" aria-hidden="true" style="color:red;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { $("#opMoreInfo").hide(); }
+            if (!this.config.showDetailsWhenOffline) { this.hideElement(document.getElementById('opMoreInfo')); }
         } else if (data.state.flags.ready) {
             icon.innerHTML = `<i class="fa fa-check-circle" aria-hidden="true" style="color:green;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { $("#opMoreInfo").show(); }
+            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
         } else if (data.state.flags.operational) {
             icon.innerHTML = `<i class="fa fa-check-circle" aria-hidden="true" style="color:green;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { $("#opMoreInfo").show(); }
+            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
         }
 
-        $("#opFile")[0].textContent = (data.job.file.name) ? data.job.file.name : "N/A";
-        $("#opPrintTime")[0].textContent = (data.progress.printTime) ? data.progress.printTime.toHHMMSS() : "N/A";
-        $("#opPrintTimeRemaining")[0].textContent = (data.progress.printTimeLeft) ? data.progress.printTimeLeft.toHHMMSS() : "N/A";
-        $("#opPercent")[0].textContent = (data.progress.completion) ? Math.round(data.progress.completion) + "%" : "N/A";
+        document.getElementById('opFile').textContent = (data.job.file.name) ? data.job.file.name : "N/A";
+        document.getElementById('opPrintTime').textContent = (data.progress.printTime) ? data.progress.printTime.toHHMMSS() : "N/A";
+        document.getElementById('opPrintTimeRemaining').textContent = (data.progress.printTimeLeft) ? data.progress.printTimeLeft.toHHMMSS() : "N/A";
+        document.getElementById('opPercent').textContent = (data.progress.completion) ? Math.round(data.progress.completion) + "%" : "N/A";
 
         if (this.config.showTemps) {
             if (data.temps.length) {
@@ -236,10 +250,10 @@ Module.register("octomirror-module", {
                     temps = data.temps[data.temps.length - 2];
                 }
 
-                $("#opNozzleTemp")[0].innerHTML = (temps.tool0.actual) ? temps.tool0.actual.toFixed(1) + "&deg;C" : "N/A";
-                $("#opNozzleTempTgt")[0].innerHTML = (temps.tool0.target) ? Math.round(temps.tool0.target) + "&deg;C" : "N/A";
-                $("#opBedTemp")[0].innerHTML = (temps.bed.actual) ? temps.bed.actual.toFixed(1) + "&deg;C" : "N/A";
-                $("#opBedTempTgt")[0].innerHTML = (temps.bed.target) ? Math.round(temps.bed.target) + "&deg;C" : "N/A";
+                document.getElementById('opNozzleTemp').innerHTML = (temps.tool0.actual) ? temps.tool0.actual.toFixed(1) + "&deg;C" : "N/A";
+                document.getElementById('opNozzleTempTgt').innerHTML = (temps.tool0.target) ? Math.round(temps.tool0.target) + "&deg;C" : "N/A";
+                document.getElementById('opBedTemp').innerHTML = (temps.bed.actual) ? temps.bed.actual.toFixed(1) + "&deg;C" : "N/A";
+                document.getElementById('opBedTempTgt').innerHTML = (temps.bed.target) ? Math.round(temps.bed.target) + "&deg;C" : "N/A";
             }
         }
     },
