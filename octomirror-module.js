@@ -21,7 +21,7 @@ Module.register("octomirror-module", {
     },
 
     //Override dom generator.
-    getDom: function() {
+    getDom: function () {
         var self = this;
         var wrapper = document.createElement("div");
 
@@ -42,7 +42,7 @@ Module.register("octomirror-module", {
             }
             var printButton = document.createElement("button");
             printButton.appendChild(document.createTextNode("Send to Printer"));
-            printButton.addEventListener("click", function() {
+            printButton.addEventListener("click", function () {
                 self.sendPrint(fileList.value);
             });
             var fileUpload = document.createElement("div");
@@ -50,7 +50,7 @@ Module.register("octomirror-module", {
             uploadFileInput.setAttribute("type", "file");
             var uploadButton = document.createElement("button");
             uploadButton.appendChild(document.createTextNode("Upload Files"));
-            uploadButton.addEventListener("click", function() {
+            uploadButton.addEventListener("click", function () {
                 self.uploadFile(uploadFileInput.value);
             });
             fileUpload.appendChild(uploadFileInput);
@@ -87,11 +87,13 @@ Module.register("octomirror-module", {
         return wrapper;
     },
 
-    start: function() {
+    start: function () {
         Log.info("Starting module: " + this.name);
         this.files = [];
         this.loaded = false;
-        if (this.config.interactive) { this.scheduleUpdate(this.config.initialLoadDelay); }
+        if (this.config.interactive) {
+            this.scheduleUpdate(this.config.initialLoadDelay);
+        }
         this.updateTimer = null;
 
         this.opClient = new OctoPrintClient();
@@ -99,7 +101,7 @@ Module.register("octomirror-module", {
         this.opClient.options.apikey = this.config.api_key;
     },
 
-    initializeSocket: function() {
+    initializeSocket: function () {
         var self = this;
 
         let user = "_api", session = "";
@@ -110,7 +112,7 @@ Module.register("octomirror-module", {
                 'Content-Type': 'application/json',
                 'X-Api-Key': this.config.api_key
             },
-            body: JSON.stringify({ passive: true })
+            body: JSON.stringify({passive: true})
         })
             .then(response => {
                 if (!response.ok) {
@@ -119,14 +121,16 @@ Module.register("octomirror-module", {
                 return response.json();
             })
             .then(data => {
-                if (this.config.debugMode) { console.log("Octoprint login response:", data); }
+                if (this.config.debugMode) {
+                    console.log("Octoprint login response:", data);
+                }
                 session = data.session;
                 // Subscribe to live push updates from the server
                 this.opClient.socket.connect();
             });
 
         this.opClient.socket.onMessage("connected", (message) => {
-            this.opClient.socket.socket.send(JSON.stringify({ auth: `${user}:${session}`}));
+            this.opClient.socket.socket.send(JSON.stringify({auth: `${user}:${session}`}));
         });
 
         if (this.config.debugMode) {
@@ -145,7 +149,7 @@ Module.register("octomirror-module", {
         });
     },
 
-    getScripts: function() {
+    getScripts: function () {
         return [
             this.file('jquery.min.js'),
             this.file('lodash.min.js'),
@@ -154,7 +158,7 @@ Module.register("octomirror-module", {
         ];
     },
 
-    getTranslations: function() {
+    getTranslations: function () {
         return {
             en: "translations/en.json",
             de: "translations/de.json",
@@ -162,17 +166,17 @@ Module.register("octomirror-module", {
         };
     },
 
-    processFiles: function(data) {
+    processFiles: function (data) {
         this.files = [];
         for (var x in data.files) {
             this.files.push(data.files[x].name);
         }
-        this.show(this.config.animationSpeed, { lockString: this.identifier });
+        this.show(this.config.animationSpeed, {lockString: this.identifier});
         this.loaded = true;
         this.updateDom(this.config.animationSpeed);
     },
 
-    scheduleUpdate: function(delay) {
+    scheduleUpdate: function (delay) {
         var nextLoad = this.config.updateInterval;
         if (typeof delay !== "undefined" && delay >= 0) {
             nextLoad = delay;
@@ -180,28 +184,28 @@ Module.register("octomirror-module", {
 
         var self = this;
         clearTimeout(this.updateTimer);
-        this.updateTimer = setTimeout(function() {
+        this.updateTimer = setTimeout(function () {
             self.updateFiles();
         }, nextLoad);
     },
 
-    updateFiles: function() {
+    updateFiles: function () {
         var self = this;
 
         this.opClient.files.list()
-            .done(function(response) {
+            .done(function (response) {
                 self.processFiles(response);
             });
     },
 
-    sendPrint: function(filename) {
+    sendPrint: function (filename) {
         this.opClient.files.select("local", filename, true);
     },
 
-    uploadFile: function(file) {
+    uploadFile: function (file) {
         var self = this;
         this.opClient.files.upload("local", file)
-            .done(function(response) {
+            .done(function (response) {
                 self.updateFiles();
             });
     },
@@ -214,28 +218,40 @@ Module.register("octomirror-module", {
         elem.style.display = 'none';
     },
 
-    updateData: function(data) {
+    updateData: function (data) {
         console.log("Updating OctoPrint Data");
         document.getElementById('opState').textContent = (data.state.text.startsWith("Offline (Error: ")) ? this.translate("OFFLINE") : data.state.text;
         var icon = document.getElementById('opStateIcon');
         if (data.state.flags.printing) {
             icon.innerHTML = `<i class="fa fa-print" aria-hidden="true" style="color:green;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
+            if (!this.config.showDetailsWhenOffline) {
+                this.showElement(document.getElementById('opMoreInfo'));
+            }
         } else if (data.state.flags.closedOrError) {
             icon.innerHTML = `<i class="fa fa-exclamation-triangle" aria-hidden="true" style="color:red;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { this.hideElement(document.getElementById('opMoreInfo')); }
+            if (!this.config.showDetailsWhenOffline) {
+                this.hideElement(document.getElementById('opMoreInfo'));
+            }
         } else if (data.state.flags.paused) {
             icon.innerHTML = `<i class="fa fa-pause" aria-hidden="true" style="color:yellow;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
+            if (!this.config.showDetailsWhenOffline) {
+                this.showElement(document.getElementById('opMoreInfo'));
+            }
         } else if (data.state.flags.error) {
             icon.innerHTML = `<i class="fa fa-exclamation-triangle" aria-hidden="true" style="color:red;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { this.hideElement(document.getElementById('opMoreInfo')); }
+            if (!this.config.showDetailsWhenOffline) {
+                this.hideElement(document.getElementById('opMoreInfo'));
+            }
         } else if (data.state.flags.ready) {
             icon.innerHTML = `<i class="fa fa-check-circle" aria-hidden="true" style="color:green;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
+            if (!this.config.showDetailsWhenOffline) {
+                this.showElement(document.getElementById('opMoreInfo'));
+            }
         } else if (data.state.flags.operational) {
             icon.innerHTML = `<i class="fa fa-check-circle" aria-hidden="true" style="color:green;"></i>`;
-            if (!this.config.showDetailsWhenOffline) { this.showElement(document.getElementById('opMoreInfo')); }
+            if (!this.config.showDetailsWhenOffline) {
+                this.showElement(document.getElementById('opMoreInfo'));
+            }
         }
 
         document.getElementById('opFile').textContent = (data.job.file.name) ? data.job.file.name : "N/A";
@@ -258,7 +274,7 @@ Module.register("octomirror-module", {
         }
     },
 
-    notificationReceived: function(notification, payload, sender) {
+    notificationReceived: function (notification, payload, sender) {
         if (notification === 'DOM_OBJECTS_CREATED') {
             this.initializeSocket();
             this.scheduleUpdate(1);
@@ -266,7 +282,7 @@ Module.register("octomirror-module", {
     }
 });
 
-Number.prototype.toHHMMSS = function() {
+Number.prototype.toHHMMSS = function () {
     var seconds = Math.floor(this),
         hours = Math.floor(seconds / 3600);
     seconds -= hours * 3600;
